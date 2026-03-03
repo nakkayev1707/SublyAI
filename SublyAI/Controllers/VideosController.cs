@@ -172,6 +172,35 @@ public class VideosController : ControllerBase
         }
     }
 
+    [HttpGet("{videoId}/video")]
+    public async Task<IActionResult> GetVideo(string videoId)
+    {
+        try
+        {
+            var videoPath = await _fileStorageService.GetVideoPathAsync(videoId);
+            if (videoPath == null)
+            {
+                return NotFound($"Video with ID {videoId} not found");
+            }
+
+            var contentType = Path.GetExtension(videoPath).ToLowerInvariant() switch
+            {
+                ".mp4" => "video/mp4",
+                ".webm" => "video/webm",
+                ".mov" => "video/quicktime",
+                ".avi" => "video/x-msvideo",
+                ".mkv" => "video/x-matroska",
+                _ => "application/octet-stream"
+            };
+            return PhysicalFile(videoPath, contentType, enableRangeProcessing: true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error streaming video {VideoId}", videoId);
+            return StatusCode(500, "Error streaming video");
+        }
+    }
+
     [HttpGet("{videoId}/subtitles/download")]
     public async Task<IActionResult> DownloadSubtitles(string videoId)
     {

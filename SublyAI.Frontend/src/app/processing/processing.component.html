@@ -1,0 +1,85 @@
+<div class="container py-5">
+  <h1 class="mb-4">Processing</h1>
+  <p class="text-muted mb-4">Transcribe, translate, and generate subtitles for video ID: <code>{{ videoId }}</code></p>
+
+  @if (error) {
+    <div class="alert alert-danger">{{ error }}</div>
+  }
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">1. Transcription</h5>
+      <button
+        class="btn btn-outline-primary"
+        [disabled]="loadingTranscribe"
+        (click)="transcribe()"
+      >
+        {{ loadingTranscribe ? 'Transcribing…' : 'Transcribe' }}
+      </button>
+      @if (transcription) {
+        <div class="mt-3">
+          <label class="form-label">Transcription text</label>
+          <textarea
+            class="form-control"
+            rows="6"
+            readonly
+          >{{ transcription.text }}</textarea>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">2. Translation</h5>
+      <div class="mb-3">
+        <label class="form-label">Target language</label>
+        <select
+          class="form-select"
+          [(ngModel)]="targetLanguage"
+          [disabled]="loadingTranslate"
+        >
+          @for (lang of languages; track lang) {
+            <option [value]="lang">{{ lang }}</option>
+          }
+        </select>
+      </div>
+      <button
+        class="btn btn-outline-primary mb-3"
+        [disabled]="loadingTranslate"
+        (click)="translate()"
+      >
+        {{ loadingTranslate ? 'Translating…' : 'Translate' }}
+      </button>
+      @if (translatedText) {
+        <div>
+          <label class="form-label">Translated text</label>
+          <textarea
+            class="form-control"
+            rows="6"
+            [(ngModel)]="translatedText"
+          ></textarea>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title">3. Subtitles</h5>
+      <button
+        class="btn btn-outline-primary"
+        [disabled]="loadingSubtitles || !translatedText.trim()"
+        (click)="generateSubtitles()"
+      >
+        {{ loadingSubtitles ? 'Generating…' : 'Generate subtitles' }}
+      </button>
+      @if (subtitleGenerated) {
+        <p class="text-success mt-2 mb-0">Subtitles generated.</p>
+        <button class="btn btn-primary mt-2" (click)="goToResult()">
+          View result &amp; download SRT
+        </button>
+      }
+    </div>
+  </div>
+</div>
